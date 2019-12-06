@@ -266,10 +266,20 @@
 (define <sum>
   (lambda (inp cont)
     (<mult> inp
-        (expect 'PLUS
+        (next-sym
+            inp
+            (lambda (inp sym)
+               (if (equal? sym 'PLUS)
+                  (lambda (inp) (cont inp (list 'ADD product)) ; We found a PLUS
+                  inp
+               )
+            )
+        )
+    )   
+  )      
+)        (expect 'PLUS
                  inp
-                 (lambda (inp)
-                     (cont inp (list 'ADD product)))))))
+                 )))))
 
 (define <mult>
   (lambda (inp cont)
