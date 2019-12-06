@@ -55,6 +55,10 @@
                    ((char=? c #\() (cont ($ inp) 'LPAR))
                    ((char=? c #\)) (cont ($ inp) 'RPAR))
                    ((char=? c #\;) (cont ($ inp) 'SEMI))
+                   ((char=? c #\+) (cont ($ inp) 'PLUS))
+                   ((char=? c #\-) (cont ($ inp) 'MINS))
+                   ((char=? c #\*) (cont ($ inp) 'TIME))
+                   ((char=? c #\/) (cont ($ inp) 'DIVD))
                    (else
                     (syntax-err))))))))
 
@@ -251,17 +255,31 @@
                                                       expr))))
                                 (<test> inp cont))))))))
 
+
+;; (ADD (INT 1) (INT 2)) ==> (cont inp (list 'ADD nb1 nb2)
+
+
 (define <test>
   (lambda (inp cont)
     (<sum> inp cont)))
 
 (define <sum>
   (lambda (inp cont)
-    (<mult> inp cont)))
+    (<mult> inp
+        (expect 'PLUS
+                 inp
+                 (lambda (inp)
+                     (cont inp (list 'ADD product)))))))
 
 (define <mult>
   (lambda (inp cont)
-    (<term> inp cont)))
+    (<term> inp
+         (lambda (inp term)
+            (expect 'TIME
+               inp
+               (lambda (inp)
+                  cont inp
+                     (list 'MUL term)))))))
 
 (define <term>
   (lambda (inp cont)
@@ -346,6 +364,8 @@
 ;; Il faut enlever la trace avant la remise...
 
 (trace main parse-and-execute execute <program> <expr>)
+
+(trace <sum> <mult>)
 
 ;;;----------------------------------------------------------------------------
 
