@@ -59,6 +59,7 @@
                    ((char=? c #\-) (cont ($ inp) 'MINS))
                    ((char=? c #\*) (cont ($ inp) 'TIME))
                    ((char=? c #\/) (cont ($ inp) 'DIVD))
+                   ((char=? c #\%) (cont ($ inp) 'MODO))
                    (else
                     (syntax-err))))))))
 
@@ -273,13 +274,13 @@
             (lambda (inp3 sym)
                (cond ((equal? sym 'PLUS)
                         (<sum> inp3 (lambda (inp4 expr) (cont inp4 (list 'ADD cont2 expr)))) ;; ADD prend toujours 2 termes
-                     ) 
-                        
+                     )
+
                   ((equal? sym 'MINS)
                         (<sum> inp3 (lambda (inp4 expr) (cont inp4 (list 'SUB cont2 expr)))) ;; SUB prend toujours 2 termes
-                  ) 
+                  )
                   (else
-                        (cont inp2 cont2)      
+                        (cont inp2 cont2)
                   )
                )
             )
@@ -295,9 +296,20 @@
       (lambda (inp2 cont2)
          (next-sym inp2
             (lambda (inp3 sym)
-               (if (equal? sym 'TIME)
-                  (<mult> inp3 (lambda (inp4 expr) (cont inp4 (list 'MUL cont2 expr)))) ;; MULT prend toujours 2 termes
-                  (cont inp2 cont2)
+              (cond ((equal? sym 'TIME)
+                       (<mult> inp3 (lambda (inp4 expr) (cont inp4 (list 'MUL cont2 expr))))
+                    )
+
+                 ((equal? sym 'DIVD)
+                      (<mult> inp3 (lambda (inp4 expr) (cont inp4 (list 'DIV cont2 expr))))
+                 )
+
+                 ((equal? sym 'MODO)
+                      (<mult> inp3 (lambda (inp4 expr) (cont inp4 (list 'MOD cont2 expr))))
+                 )
+                 (else
+                      (cont inp2 cont2)
+                 )
                )
             )
          )
@@ -382,7 +394,7 @@
        (cont env
              output
              (cadr ast))) ;; retourner la valeur de la constante
-                    
+
       (else
        "internal error (unknown expression AST)\n"))))
 
