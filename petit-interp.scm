@@ -271,9 +271,16 @@
       (lambda (inp2 cont2)
          (next-sym inp2
             (lambda (inp3 sym)
-               (if (equal? sym 'PLUS)
-                  (<sum> inp3 (lambda (inp4 expr) (cont inp4 (list 'ADD cont2 expr)))) ;; ADD prend toujours 2 termes
-                  (cont inp2 cont2)
+               (cond ((equal? sym 'PLUS)
+                        (<sum> inp3 (lambda (inp4 expr) (cont inp4 (list 'ADD cont2 expr)))) ;; ADD prend toujours 2 termes
+                     ) 
+                        
+                  ((equal? sym 'MINS)
+                        (<sum> inp3 (lambda (inp4 expr) (cont inp4 (list 'SUB cont2 expr)))) ;; SUB prend toujours 2 termes
+                  ) 
+                  (else
+                        (cont inp2 cont2)      
+                  )
                )
             )
          )
