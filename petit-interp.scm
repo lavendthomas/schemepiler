@@ -289,7 +289,7 @@
          (next-sym inp2
             (lambda (inp3 sym)
                (if (equal? sym 'PLUS)
-                  (<mult> inp3 cont)
+                  (<mult> imp3 (lambda (inp4 expr) (cont inp3)))
                   (cont inp2 cont2)
                )
             )
