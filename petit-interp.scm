@@ -267,18 +267,7 @@
 
 (define <sum>
   (lambda (inp cont)
-    (<mult> inp
-      (lambda (inp2 cont2)
-         (next-sym inp2
-            (lambda (inp3 sym)
-               (if (equal? sym 'PLUS)
-                  (<sum> inp3 (lambda (inp4 expr) (cont inp3 (list 'ADD expr))))
-                  (cont inp3 cont2)
-               )
-            )
-         )
-      )
-    )
+    (<mult> inp cont)
   )
 )
 
@@ -289,8 +278,8 @@
          (next-sym inp2
             (lambda (inp3 sym)
                (if (equal? sym 'TIME)
-                  (<mult> inp3 (lambda (inp4 expr) (cont inp3 (list 'MUL expr))))
-                  (cont inp3 cont2)
+                  (<mult> inp3 (lambda (inp4 expr) (cont inp4 (list 'MUL expr))))
+                  (cont inp2 cont2)
                )
             )
          )
