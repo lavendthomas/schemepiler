@@ -106,6 +106,14 @@
 (define lettre?
   (lambda (c)
     (and (char>=? c #\a) (char<=? c #\z))))
+    
+(define strip->number
+  (lambda (str)
+      (let ((stripped (substring str 0 (- (string-length str) 1))))
+        (string->number stripped)
+      )
+  )
+)
 
 ;; La fonction symbol-int recoit deux parametres, une liste de
 ;; caracteres qui debute par un chiffre et une continuation.  La liste
@@ -394,7 +402,48 @@
        (cont env
              output
              (cadr ast))) ;; retourner la valeur de la constante
-
+      
+      ((ADD)
+       (cont env
+             output
+             (+ (strip->number (exec-expr env output (cadr ast) cont))
+                (strip->number (exec-expr env output (caddr ast) cont)))
+       )
+      )
+      
+      ((SUB)
+       (cont env
+             output
+             (- (strip->number (exec-expr env output (cadr ast) cont))
+                (strip->number (exec-expr env output (caddr ast) cont)))
+       )
+      )
+      
+      ((MUL)
+       (cont env
+             output
+             (* (strip->number (exec-expr env output (cadr ast) cont))
+                (strip->number (exec-expr env output (caddr ast) cont)))
+       )
+      )
+      
+      ((DIV)
+       (cont env
+             output
+             (quotient (strip->number (exec-expr env output (cadr ast) cont))
+                       (strip->number (exec-expr env output (caddr ast) cont)))
+       )
+      )
+      
+      ((MOD)
+       (cont env
+             output
+             (remainder (strip->number (exec-expr env output (cadr ast) cont))
+                        (strip->number (exec-expr env output (caddr ast) cont)))
+       )
+      )
+      
+                    
       (else
        "internal error (unknown expression AST)\n"))))
 
@@ -402,7 +451,7 @@
 
 (trace main parse-and-execute execute <program> <expr>)
 
-(trace <sum> <mult> <term> next-sym)
+(trace <sum> <mult> <term> next-sym exec-stat exec-expr)
 
 
 ;;;----------------------------------------------------------------------------
