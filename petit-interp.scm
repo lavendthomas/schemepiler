@@ -263,33 +263,41 @@
   (lambda (inp cont)
     (<sum> inp cont)))
 
+
+
 (define <sum>
   (lambda (inp cont)
     (<mult> inp
-        (next-sym
-            inp
-            (lambda (inp sym)
+      (lambda (inp2 cont2)
+         (next-sym inp2
+            (lambda (inp3 sym)
                (if (equal? sym 'PLUS)
-                  (lambda (inp) (cont inp (list 'ADD product)) ; We found a PLUS
-                  inp
+                  (<sum> inp3 cont)
+                  (cont inp2 cont2)
                )
             )
-        )
-    )   
-  )      
-)        (expect 'PLUS
-                 inp
-                 )))))
+         )
+      )
+    )
+  )
+)
 
 (define <mult>
   (lambda (inp cont)
     (<term> inp
-         (lambda (inp term)
-            (expect 'TIME
-               inp
-               (lambda (inp)
-                  cont inp
-                     (list 'MUL term)))))))
+      (lambda (inp2 cont2)
+         (next-sym inp2
+            (lambda (inp3 sym)
+               (if (equal? sym 'PLUS)
+                  (<mult> inp3 cont)
+                  (cont inp2 cont2)
+               )
+            )
+         )
+      )
+    )
+  )
+)
 
 (define <term>
   (lambda (inp cont)
@@ -375,7 +383,7 @@
 
 (trace main parse-and-execute execute <program> <expr>)
 
-(trace <sum> <mult>)
+(trace <sum> <mult> <term> next-sym)
 
 ;;;----------------------------------------------------------------------------
 
