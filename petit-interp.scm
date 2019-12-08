@@ -272,8 +272,8 @@
          (next-sym inp2
             (lambda (inp3 sym)
                (if (equal? sym 'PLUS)
-                  (<sum> inp3 cont)
-                  (cont inp2 cont2)
+                  (<sum> inp3 (lambda (inp4 expr) (cont inp3 (list 'ADD expr))))
+                  (cont inp3 cont2)
                )
             )
          )
@@ -288,9 +288,9 @@
       (lambda (inp2 cont2)
          (next-sym inp2
             (lambda (inp3 sym)
-               (if (equal? sym 'PLUS)
-                  (<mult> imp3 (lambda (inp4 expr) (cont inp3)))
-                  (cont inp2 cont2)
+               (if (equal? sym 'TIME)
+                  (<mult> inp3 (lambda (inp4 expr) (cont inp3 (list 'MUL expr))))
+                  (cont inp3 cont2)
                )
             )
          )
@@ -384,6 +384,7 @@
 (trace main parse-and-execute execute <program> <expr>)
 
 (trace <sum> <mult> <term> next-sym)
+
 
 ;;;----------------------------------------------------------------------------
 
