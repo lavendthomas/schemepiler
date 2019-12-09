@@ -463,18 +463,19 @@
                     (cont env output)))) ;; continuer en ignorant le resultat
       
       ((SEQ) ;; suite de 2 statements
-         (exec_stat env
+         (exec-stat env
                     output
                     (cadr ast)
-                    (lambda (env output val)
-                        cont env output)
+                    cont
          )
-         (exec_stat env
+         (exec-stat env
                     output
                     (caddr ast)
-                    (lambda (env output val)
-                        cont env output)
+                    cont
          )
+         
+         
+         
       )
 
       (else
@@ -595,7 +596,7 @@
 
 (trace main parse-and-execute execute <program> <expr>)
 
-(trace <sum> <mult> <term> next-sym exec-stat exec-expr)
+(trace <sum> <mult> <term> next-sym exec-stat exec-expr <stat>)
 
 
 ;;;----------------------------------------------------------------------------
