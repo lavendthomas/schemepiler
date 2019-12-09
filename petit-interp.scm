@@ -183,17 +183,17 @@
         (symbol-id-aux ($ inp) cont (cons (@ inp) lst))
         (let ((id (list->string (reverse lst))))
           (cond ((string=? id "print")
-                 (cont inp 'PRINT-SYM))
-          (cond ((string=? id "if")
-                (cont inp 'IF-SYM))
-          (cond ((string=? id "while")
-                (cont inp 'WHILE-SYM))
-          (cond ((string=? id "do")
-                (cont inp 'DO-SYM))
-          (cond ((string=? id "else")
-                (cont inp 'ELSE-SYM))
+                   (cont inp 'PRINT-SYM))
+                ((string=? id "if")
+                   (cont inp 'IF-SYM))
+                ((string=? id "while")
+                   (cont inp 'WHILE-SYM))
+                ((string=? id "do")
+                   (cont inp 'DO-SYM))
+                ((string=? id "else")
+                   (cont inp 'ELSE-SYM))
                 (else
-                 (cont inp id)))))))
+                   (cont inp id)))))))
 
 ;; La fonction expect recoit trois parametres, un symbole, une liste
 ;; de caracteres et une continuation.  La liste de caracteres sera
