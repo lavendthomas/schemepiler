@@ -248,7 +248,14 @@
               (lambda (inp2 sym)
                 (case sym ;; determiner quel genre de <stat>
                   ((PRINT-SYM)
-                   (<print_stat> inp2 cont))
+                   (<print_stat> inp2 (lambda (inp3 cont3) 
+                                             (next-sym inp3 (lambda (inp4 sym4)
+                                                               (if (equal? sym4 'EOI)
+                                                                  (cont inp3 cont3)
+                                                                  (<stat> inp3 (lambda (inp4 expr)
+                                                                                    (cont inp4 (list 'SEQ cont3 expr))))))))
+                   )
+                  )
                   (else
                    (<expr_stat> inp cont)))))))
 
@@ -444,7 +451,6 @@
                                                      "false")
                                                (else
                                                      (number->string val)
-                                         
                                                )
                                           )
                                          "\n")))))
@@ -455,6 +461,21 @@
                   (cadr ast)
                   (lambda (env output val)
                     (cont env output)))) ;; continuer en ignorant le resultat
+      
+      ((SEQ) ;; suite de 2 statements
+         (exec_stat env
+                    output
+                    (cadr ast)
+                    (lambda (env output val)
+                        cont env output)
+         )
+         (exec_stat env
+                    output
+                    (caddr ast)
+                    (lambda (env output val)
+                        cont env output)
+         )
+      )
 
       (else
        "internal error (unknown statement AST)\n"))))
