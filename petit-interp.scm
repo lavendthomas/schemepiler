@@ -438,7 +438,15 @@
                   (lambda (env output val)
                     (cont env ;; ajouter le resultat a la sortie
                           (string-append output
-                                         (number->string val)
+                                         (cond ((equal? val #t)
+                                                     "true")
+                                               ((equal? val #f)
+                                                     "false")
+                                               (else
+                                                     (number->string val)
+                                         
+                                               )
+                                          )
                                          "\n")))))
 
       ((EXPR)
@@ -469,7 +477,7 @@
        (cont env
              output
              (cadr ast))) ;; retourner la valeur de la constante
-
+      
       ((ADD)
        (cont env
              output
@@ -477,7 +485,7 @@
                 (strip->number (exec-expr env output (caddr ast) cont)))
        )
       )
-
+      
       ((SUB)
        (cont env
              output
@@ -485,7 +493,7 @@
                 (strip->number (exec-expr env output (caddr ast) cont)))
        )
       )
-
+      
       ((MUL)
        (cont env
              output
@@ -493,7 +501,7 @@
                 (strip->number (exec-expr env output (caddr ast) cont)))
        )
       )
-
+      
       ((DIV)
        (cont env
              output
@@ -501,7 +509,7 @@
                        (strip->number (exec-expr env output (caddr ast) cont)))
        )
       )
-
+      
       ((MOD)
        (cont env
              output
@@ -509,8 +517,56 @@
                         (strip->number (exec-expr env output (caddr ast) cont)))
        )
       )
-
-
+      
+      ((LT)
+       (cont env
+             output
+             (< (strip->number (exec-expr env output (cadr ast) cont))
+             (strip->number (exec-expr env output (caddr ast) cont)))
+       )   
+      )
+      
+      ((GT)
+       (cont env
+             output
+             (> (strip->number (exec-expr env output (cadr ast) cont))
+             (strip->number (exec-expr env output (caddr ast) cont)))
+       )   
+      )
+      
+      ((LE)
+       (cont env
+             output
+             (<= (strip->number (exec-expr env output (cadr ast) cont))
+             (strip->number (exec-expr env output (caddr ast) cont)))
+       )   
+      )
+      
+      ((GE)
+       (cont env
+             output
+             (>= (strip->number (exec-expr env output (cadr ast) cont))
+             (strip->number (exec-expr env output (caddr ast) cont)))
+       )   
+      )
+      
+      ((EQ)
+       (cont env
+             output
+             (equal? (strip->number (exec-expr env output (cadr ast) cont))
+             (strip->number (exec-expr env output (caddr ast) cont)))
+       )   
+      )
+      
+      ((NE)
+       (cont env
+             output
+             (not (equal? (strip->number (exec-expr env output (cadr ast) cont))
+             (strip->number (exec-expr env output (caddr ast) cont))))
+       )   
+      )
+      
+                    
       (else
        "internal error (unknown expression AST)\n"))))
 
