@@ -60,6 +60,11 @@
                    ((char=? c #\*) (cont ($ inp) 'TIME))
                    ((char=? c #\/) (cont ($ inp) 'DIVD))
                    ((char=? c #\%) (cont ($ inp) 'MODO))
+                   ((char=? c #\<) (cont ($ inp) 'LT))
+                   ((char=? c #\>) (cont ($ inp) 'GT))
+                   ((char=? c #\=) (cont ($ inp) 'EQ)) ;; INCOMPLET simplement = pas ==
+                   ((char=? c #\!) (cont ($ inp) 'NE)) ;; INCOMPLET simplement ! pas !=
+
                    (else
                     (syntax-err))))))))
 
@@ -106,7 +111,7 @@
 (define lettre?
   (lambda (c)
     (and (char>=? c #\a) (char<=? c #\z))))
-    
+
 (define strip->number
   (lambda (str)
       (let ((stripped (substring str 0 (- (string-length str) 1))))
@@ -270,7 +275,38 @@
 
 (define <test>
   (lambda (inp cont)
-    (<sum> inp cont)))
+    (<sum> inp
+      (lambda (inp2 cont2)
+        (next-sym inp2
+          (lambda (inp3 sym)
+            (cond ((equal? sym 'LT)
+                    (<sum> inp3 (lambda (inp4 expr) (cont inp4 (list 'LT cont2 expr))))
+                  )
+                   ((equal? sym 'LE)
+                      (<sum> inp3 (lambda (inp4 expr) (cont inp4 (list 'LE cont2 expr))))
+                   )
+                   ((equal? sym 'GT)
+                      (<sum> inp3 (lambda (inp4 expr) (cont inp4 (list 'GT cont2 expr))))
+                   )
+                   ((equal? sym 'GE)
+                      (<sum> inp3 (lambda (inp4 expr) (cont inp4 (list 'GE cont2 expr))))
+                   )
+                   ((equal? sym 'EQ)
+                      (<sum> inp3 (lambda (inp4 expr) (cont inp4 (list 'EQ cont2 expr))))
+                   )
+                   ((equal? sym 'NE)
+                      (<sum> inp3 (lambda (inp4 expr) (cont inp4 (list 'NE cont2 expr))))
+                   )
+                (else
+                      (cont inp2 cont2)
+              )
+            )
+          )
+        )
+      )
+    )
+  )
+)
 
 
 
@@ -283,7 +319,6 @@
                (cond ((equal? sym 'PLUS)
                         (<sum> inp3 (lambda (inp4 expr) (cont inp4 (list 'ADD cont2 expr)))) ;; ADD prend toujours 2 termes
                      )
-
                   ((equal? sym 'MINS)
                         (<sum> inp3 (lambda (inp4 expr) (cont inp4 (list 'SUB cont2 expr)))) ;; SUB prend toujours 2 termes
                   )
@@ -402,7 +437,7 @@
        (cont env
              output
              (cadr ast))) ;; retourner la valeur de la constante
-      
+
       ((ADD)
        (cont env
              output
@@ -410,7 +445,7 @@
                 (strip->number (exec-expr env output (caddr ast) cont)))
        )
       )
-      
+
       ((SUB)
        (cont env
              output
@@ -418,7 +453,7 @@
                 (strip->number (exec-expr env output (caddr ast) cont)))
        )
       )
-      
+
       ((MUL)
        (cont env
              output
@@ -426,7 +461,7 @@
                 (strip->number (exec-expr env output (caddr ast) cont)))
        )
       )
-      
+
       ((DIV)
        (cont env
              output
@@ -434,7 +469,7 @@
                        (strip->number (exec-expr env output (caddr ast) cont)))
        )
       )
-      
+
       ((MOD)
        (cont env
              output
@@ -442,8 +477,8 @@
                         (strip->number (exec-expr env output (caddr ast) cont)))
        )
       )
-      
-                    
+
+
       (else
        "internal error (unknown expression AST)\n"))))
 
