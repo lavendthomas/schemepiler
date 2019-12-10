@@ -77,7 +77,7 @@
                    ((char=? c #\=) (let ((cnext (@ ($ inp))))
                                      (if (char=? cnext #\=)
                                        (cont ($ ($ inp)) 'EQ)
-                                       (cont ($ inp) 'ASSIGN)
+                                       (cont ($ inp) 'AS)
                                      )
                                    )
                    )
@@ -264,6 +264,9 @@
                                                                   (<stat> inp3 (lambda (inp4 expr)
                                                                                     (cont inp4 (list 'SEQ cont3 expr))))))))
                    )
+                  )
+                  ((WHILE-SYM)
+                     (print "WHILE")
                   )
                   (else
                    (<expr_stat> inp cont)))))))
