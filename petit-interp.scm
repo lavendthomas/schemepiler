@@ -114,6 +114,15 @@
 (define syntax-err
   (lambda ()
     "syntax error\n"))
+    
+;; La fonction syntax-err retourne le message d'erreur indiquant une
+;; erreur arithmetique.
+    
+(define arithmetic-err
+   (lambda (reason)
+      (begin
+         (print (string-append "Arithmetic error: " reason "\n")))
+         (exit)))
 
 ;; La fonction blanc? teste si son unique parametre est un caractere
 ;; blanc.
@@ -473,9 +482,6 @@
                     (caddr ast)
                     cont
          )
-         
-         
-         
       )
 
       (else
@@ -527,8 +533,11 @@
       ((DIV)
        (cont env
              output
-             (quotient (strip->number (exec-expr env output (cadr ast) cont))
-                       (strip->number (exec-expr env output (caddr ast) cont)))
+             (if (equal? 0 (strip->number (exec-expr env output (caddr ast) cont)))
+                (arithmetic-err "division by zero.")
+                (quotient (strip->number (exec-expr env output (cadr ast) cont))
+                          (strip->number (exec-expr env output (caddr ast) cont)))
+             )
        )
       )
       
