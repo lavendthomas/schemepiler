@@ -311,7 +311,7 @@
                 (next-sym inp2 ;; verifier 2e symbole du <expr>
                           (lambda (inp3 sym2)
                             (if (and (string? sym1) ;; combinaison "id =" ?
-                                     (equal? sym2 'EQ))
+                                     (equal? sym2 'AS))
                                 (<expr> inp3
                                         (lambda (inp expr)
                                           (cont inp
