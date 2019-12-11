@@ -250,6 +250,15 @@
 (define <program>
   (lambda (inp cont)
     (<stat> inp cont))) ;; analyser un <stat>
+    
+(define continue-stat
+   (lambda (cont)
+      (lambda (inp3 cont3)
+         (next-sym inp3 (lambda (inp4 sym4)
+                           (if (equal? sym4 'EOI)
+                              (cont inp3 cont3)
+                              (<stat> inp3 (lambda (inp4 expr)
+                                                (cont inp4 (list 'SEQ cont3 expr))))))))))
 
 (define <stat>
   (lambda (inp cont)
@@ -257,22 +266,16 @@
               (lambda (inp2 sym)
                 (case sym ;; determiner quel genre de <stat>
                   ((PRINT-SYM)
-                   (<print_stat> inp2 (lambda (inp3 cont3)
-                                             (next-sym inp3 (lambda (inp4 sym4)
-                                                               (if (equal? sym4 'EOI)
-                                                                  (cont inp3 cont3)
-                                                                  (<stat> inp3 (lambda (inp4 expr)
-                                                                                    (cont inp4 (list 'SEQ cont3 expr))))))))
-                   )
+                   (<print_stat> inp2 (continue-stat cont))
                   )
                   ((WHILE-SYM)
-                    (<while_stat> inp2 cont)
+                    (<while_stat> inp2 (continue-stat cont))
                   )
                   ((IF-SYM)
                     (<if_stat> inp2 cont)
                   )
                   (else
-                   (<expr_stat> inp cont)))))))
+                   (<expr_stat> inp (continue-stat cont))))))))
 
 
 (define <while_stat>
@@ -525,6 +528,12 @@
 (define exec-expr
   (lambda (env output ast cont)
     (case (car ast)
+    
+      ((ASSIGN) 
+       (cont (cons (cons (cadr ast)  (exec-expr env output (caddr ast) (lambda (x y val) val))) env) ;; environement où on a ajouté la variable
+             output
+             '())   ;; pas de sous-arbre où continuer le travail
+      )
 
       ((INT)
        (cont env
