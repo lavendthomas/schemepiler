@@ -503,6 +503,12 @@
 (define exec-expr
   (lambda (env output ast cont)
     (case (car ast)
+    
+      ((ASSIGN) 
+       (cont (cons (cons (cadr ast)  (exec-expr env output (caddr ast) (lambda (x y val) val))) env) ;; environement où on a ajouté la variable
+             output
+             '())   ;; pas de sous-arbre où continuer le travail
+      )
 
       ((INT)
        (cont env
