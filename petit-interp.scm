@@ -268,6 +268,9 @@
                   ((WHILE-SYM)
                     (<while_stat> inp2 cont)
                   )
+                  ((IF-SYM)
+                    (<if_stat> inp2 cont)
+                  )
                   (else
                    (<expr_stat> inp cont)))))))
 
@@ -279,6 +282,16 @@
                (<stat> inp2
                    (lambda (inp3 expr_stat)
                        (cont inp3 (list 'WHILE expr_par expr_stat))))))))
+
+(define <if_stat>
+  (lambda (inp cont)
+      (<paren_expr> inp
+          (lambda (inp2 expr_par)
+              (<stat> inp2
+                  (lambda (inp3 expr_stat)
+                      (cont inp3 (list 'IF expr_par expr_stat))))))))
+
+
 
 (define <print_stat>
   (lambda (inp cont)
@@ -615,7 +628,7 @@
 
 ;; Il faut enlever la trace avant la remise...
 
-(trace main parse-and-execute execute <program> <expr>)
+(trace main parse-and-execute execute <program> <expr> <while_stat> <if_stat>)
 
 (trace <sum> <mult> <term> next-sym exec-stat exec-expr <stat>)
 
