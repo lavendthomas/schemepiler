@@ -114,10 +114,10 @@
 (define syntax-err
   (lambda ()
     "syntax error\n"))
-    
+
 ;; La fonction syntax-err retourne le message d'erreur indiquant une
 ;; erreur arithmetique.
-    
+
 (define arithmetic-err
    (lambda (reason)
       (begin
@@ -257,7 +257,7 @@
               (lambda (inp2 sym)
                 (case sym ;; determiner quel genre de <stat>
                   ((PRINT-SYM)
-                   (<print_stat> inp2 (lambda (inp3 cont3) 
+                   (<print_stat> inp2 (lambda (inp3 cont3)
                                              (next-sym inp3 (lambda (inp4 sym4)
                                                                (if (equal? sym4 'EOI)
                                                                   (cont inp3 cont3)
@@ -266,10 +266,19 @@
                    )
                   )
                   ((WHILE-SYM)
-                     (print "WHILE")
+                    (<while_stat> inp2 cont)
                   )
                   (else
                    (<expr_stat> inp cont)))))))
+
+
+(define <while_stat>
+   (lambda (inp cont)
+       (<paren_expr> inp
+           (lambda (inp2 expr_par)
+               (<stat> inp2
+                   (lambda (inp3 expr_stat)
+                       (cont inp3 (list 'WHILE expr_par expr_stat))))))))
 
 (define <print_stat>
   (lambda (inp cont)
@@ -473,7 +482,7 @@
                   (cadr ast)
                   (lambda (env output val)
                     (cont env output)))) ;; continuer en ignorant le resultat
-      
+
       ((SEQ) ;; suite de 2 statements
          (exec-stat env
                     output
@@ -508,7 +517,7 @@
        (cont env
              output
              (cadr ast))) ;; retourner la valeur de la constante
-      
+
       ((ADD)
        (cont env
              output
@@ -516,7 +525,7 @@
                 (strip->number (exec-expr env output (caddr ast) cont)))
        )
       )
-      
+
       ((SUB)
        (cont env
              output
@@ -524,7 +533,7 @@
                 (strip->number (exec-expr env output (caddr ast) cont)))
        )
       )
-      
+
       ((MUL)
        (cont env
              output
@@ -532,7 +541,7 @@
                 (strip->number (exec-expr env output (caddr ast) cont)))
        )
       )
-      
+
       ((DIV)
        (cont env
              output
@@ -543,7 +552,7 @@
              )
        )
       )
-      
+
       ((MOD)
        (cont env
              output
@@ -551,56 +560,56 @@
                         (strip->number (exec-expr env output (caddr ast) cont)))
        )
       )
-      
+
       ((LT)
        (cont env
              output
              (< (strip->number (exec-expr env output (cadr ast) cont))
              (strip->number (exec-expr env output (caddr ast) cont)))
-       )   
+       )
       )
-      
+
       ((GT)
        (cont env
              output
              (> (strip->number (exec-expr env output (cadr ast) cont))
              (strip->number (exec-expr env output (caddr ast) cont)))
-       )   
+       )
       )
-      
+
       ((LE)
        (cont env
              output
              (<= (strip->number (exec-expr env output (cadr ast) cont))
              (strip->number (exec-expr env output (caddr ast) cont)))
-       )   
+       )
       )
-      
+
       ((GE)
        (cont env
              output
              (>= (strip->number (exec-expr env output (cadr ast) cont))
              (strip->number (exec-expr env output (caddr ast) cont)))
-       )   
+       )
       )
-      
+
       ((EQ)
        (cont env
              output
              (equal? (strip->number (exec-expr env output (cadr ast) cont))
              (strip->number (exec-expr env output (caddr ast) cont)))
-       )   
+       )
       )
-      
+
       ((NE)
        (cont env
              output
              (not (equal? (strip->number (exec-expr env output (cadr ast) cont))
              (strip->number (exec-expr env output (caddr ast) cont))))
-       )   
+       )
       )
-      
-                    
+
+
       (else
        "internal error (unknown expression AST)\n"))))
 
