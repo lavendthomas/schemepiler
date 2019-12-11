@@ -517,7 +517,10 @@
     (case (car ast)
     
       ((ASSIGN) 
-       (cont (cons (cons (cadr ast)  (exec-expr env output (caddr ast) (lambda (x y val) val))) env) ;; environement où on a ajouté la variable
+       (cont (cons (cons (cadr ast)
+                         (exec-expr env output (caddr ast)
+                             (lambda (x y val) val)))
+                    env) ;; environement où on a ajouté la variable
              output
              '())   ;; pas de sous-arbre où continuer le travail
       )
@@ -616,6 +619,17 @@
              (not (equal? (strip->number (exec-expr env output (cadr ast) cont))
              (strip->number (exec-expr env output (caddr ast) cont))))
        )
+      ((IF)
+       (let ((ans (exec-expr env
+                             output
+                             (cadr ast)
+                             (lambda (env output val) output))))
+            (if ans
+               cont 
+               cont
+            )
+       )
+      )
       )
 
 
