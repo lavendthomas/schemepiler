@@ -63,32 +63,19 @@
                    ((char=? c #\<) (let ((cnext (@ ($ inp))))
                                      (if (char=? cnext #\=)
                                        (cont ($ ($ inp)) 'LE)
-                                       (cont ($ inp) 'LT)
-                                     )
-                                   )
-                   )
+                                       (cont ($ inp) 'LT))))
                    ((char=? c #\>) (let ((cnext (@ ($ inp))))
                                      (if (char=? cnext #\=)
                                        (cont ($ ($ inp)) 'GE)
-                                       (cont ($ inp) 'GT)
-                                     )
-                                   )
-                   )
+                                       (cont ($ inp) 'GT))))
                    ((char=? c #\=) (let ((cnext (@ ($ inp))))
                                      (if (char=? cnext #\=)
                                        (cont ($ ($ inp)) 'EQ)
-                                       (cont ($ inp) 'AS)
-                                     )
-                                   )
-                   )
+                                       (cont ($ inp) 'AS))))
                    ((char=? c #\!) (let ((cnext (@ ($ inp))))
                                      (if (char=? cnext #\=)
                                        (cont ($ ($ inp)) 'NE)
-                                       (syntax-err) ;; TODO trow error
-                                     )
-                                   )
-                   )
-
+                                       (syntax-err)))) ;; TODO trow error
                    (else
                     (syntax-err))))))))
 
@@ -148,10 +135,7 @@
 (define strip->number
   (lambda (str)
       (let ((stripped (substring str 0 (- (string-length str) 1))))
-        (string->number stripped)
-      )
-  )
-)
+        (string->number stripped))))
 
 ;; La fonction symbol-int recoit deux parametres, une liste de
 ;; caracteres qui debute par un chiffre et une continuation.  La liste
@@ -250,7 +234,7 @@
 (define <program>
   (lambda (inp cont)
     (<stat> inp cont))) ;; analyser un <stat>
-    
+
 (define continue-stat
    (lambda (cont)
       (lambda (inp3 cont3)
@@ -266,17 +250,13 @@
               (lambda (inp2 sym)
                 (case sym ;; determiner quel genre de <stat>
                   ((PRINT-SYM)
-                   (<print_stat> inp2 (continue-stat cont))
-                  )
+                   (<print_stat> inp2 (continue-stat cont)))
                   ((WHILE-SYM)
-                    (<while_stat> inp2 (continue-stat cont))
-                  )
+                    (<while_stat> inp2 (continue-stat cont)))
                   ((IF-SYM)
-                    (<if_stat> inp2 (continue-stat cont))
-                  )
+                    (<if_stat> inp2 (continue-stat cont)))
                   (else
                    (<expr_stat> inp (continue-stat cont))))))))
-
 
 (define <while_stat>
    (lambda (inp cont)
@@ -293,8 +273,6 @@
               (<stat> inp2
                   (lambda (inp3 expr_stat)
                       (cont inp3 (list 'IF expr_par expr_stat))))))))
-
-
 
 (define <print_stat>
   (lambda (inp cont)
@@ -345,8 +323,6 @@
                                                       expr))))
                                 (<test> inp cont))))))))
 
-
-
 (define <test>
   (lambda (inp cont)
     (<sum> inp
@@ -354,35 +330,19 @@
         (next-sym inp2
           (lambda (inp3 sym)
             (cond ((equal? sym 'LT)
-                    (<sum> inp3 (lambda (inp4 expr) (cont inp4 (list 'LT cont2 expr))))
-                  )
+                    (<sum> inp3 (lambda (inp4 expr) (cont inp4 (list 'LT cont2 expr)))))
                    ((equal? sym 'LE)
-                      (<sum> inp3 (lambda (inp4 expr) (cont inp4 (list 'LE cont2 expr))))
-                   )
+                      (<sum> inp3 (lambda (inp4 expr) (cont inp4 (list 'LE cont2 expr)))))
                    ((equal? sym 'GT)
-                      (<sum> inp3 (lambda (inp4 expr) (cont inp4 (list 'GT cont2 expr))))
-                   )
+                      (<sum> inp3 (lambda (inp4 expr) (cont inp4 (list 'GT cont2 expr)))))
                    ((equal? sym 'GE)
-                      (<sum> inp3 (lambda (inp4 expr) (cont inp4 (list 'GE cont2 expr))))
-                   )
+                      (<sum> inp3 (lambda (inp4 expr) (cont inp4 (list 'GE cont2 expr)))))
                    ((equal? sym 'EQ)
-                      (<sum> inp3 (lambda (inp4 expr) (cont inp4 (list 'EQ cont2 expr))))
-                   )
+                      (<sum> inp3 (lambda (inp4 expr) (cont inp4 (list 'EQ cont2 expr)))))
                    ((equal? sym 'NE)
-                      (<sum> inp3 (lambda (inp4 expr) (cont inp4 (list 'NE cont2 expr))))
-                   )
+                      (<sum> inp3 (lambda (inp4 expr) (cont inp4 (list 'NE cont2 expr)))))
                 (else
-                      (cont inp2 cont2)
-              )
-            )
-          )
-        )
-      )
-    )
-  )
-)
-
-
+                      (cont inp2 cont2)))))))))
 
 (define <sum>
   (lambda (inp cont)
@@ -391,21 +351,11 @@
          (next-sym inp2
             (lambda (inp3 sym)
                (cond ((equal? sym 'PLUS)
-                        (<sum> inp3 (lambda (inp4 expr) (cont inp4 (list 'ADD cont2 expr)))) ;; ADD prend toujours 2 termes
-                     )
+                        (<sum> inp3 (lambda (inp4 expr) (cont inp4 (list 'ADD cont2 expr)))))  ;; ADD prend toujours 2 termes
                   ((equal? sym 'MINS)
-                        (<sum> inp3 (lambda (inp4 expr) (cont inp4 (list 'SUB cont2 expr)))) ;; SUB prend toujours 2 termes
-                  )
+                        (<sum> inp3 (lambda (inp4 expr) (cont inp4 (list 'SUB cont2 expr))))) ;; SUB prend toujours 2 termes
                   (else
-                        (cont inp2 cont2)
-                  )
-               )
-            )
-         )
-      )
-    )
-  )
-)
+                        (cont inp2 cont2)))))))))
 
 (define <mult>
   (lambda (inp cont)
@@ -414,26 +364,13 @@
          (next-sym inp2
             (lambda (inp3 sym)
               (cond ((equal? sym 'TIME)
-                       (<mult> inp3 (lambda (inp4 expr) (cont inp4 (list 'MUL cont2 expr))))
-                    )
-
+                       (<mult> inp3 (lambda (inp4 expr) (cont inp4 (list 'MUL cont2 expr)))))
                  ((equal? sym 'DIVD)
-                      (<mult> inp3 (lambda (inp4 expr) (cont inp4 (list 'DIV cont2 expr))))
-                 )
-
+                      (<mult> inp3 (lambda (inp4 expr) (cont inp4 (list 'DIV cont2 expr)))))
                  ((equal? sym 'MODO)
-                      (<mult> inp3 (lambda (inp4 expr) (cont inp4 (list 'MOD cont2 expr))))
-                 )
+                      (<mult> inp3 (lambda (inp4 expr) (cont inp4 (list 'MOD cont2 expr)))))
                  (else
-                      (cont inp2 cont2)
-                 )
-               )
-            )
-         )
-      )
-    )
-  )
-)
+                      (cont inp2 cont2)))))))))
 
 (define <term>
   (lambda (inp cont)
@@ -485,11 +422,8 @@
                                                ((equal? val #f)
                                                      "false")
                                                (else
-                                                     (number->string val)
-                                               )
-                                          )
+                                                     (number->string val)))
                                          "\n")))))
-
       ((EXPR)
        (exec-expr env ;; evaluer l'expression
                   output
@@ -501,27 +435,19 @@
          (exec-stat env
                     output
                     (cadr ast)
-                    cont
-         )
+                    cont)
          (exec-stat env    ;; donner l'env d'output du premier au deuxième
                     output ;; concat les sorties
                     (caddr ast)
-                    cont
-         )
-      )
-      
+                    cont))
+
       ((IF)
          (exec-expr env
-                    output 
+                    output
                     (cadr ast)
                     (lambda (env output val)
                       (pp val)
-                      (if (not (boolean? val)) (number->string val) val)
-                      
-                    )
-         )
-      )
-
+                      (if (not (boolean? val)) (number->string val) val))))
       (else
        "internal error (unknown statement AST)\n"))))
 
@@ -538,112 +464,75 @@
 (define exec-expr
   (lambda (env output ast cont)
     (case (car ast)
-    
-      ((ASSIGN) 
+
+      ((ASSIGN)
        (cont (cons (cons (cadr ast)
                          (exec-expr env output (caddr ast)
                              (lambda (x y val) val)))
                     env) ;; environement où on a ajouté la variable
              output
-             '())   ;; pas de sous-arbre où continuer le travail
-      )
-
+             '())) ;; pas de sous-arbre où continuer le travail
       ((INT)
          (cont env ;; retourner la valeur de la constante
                output
-               (cadr ast)))                       
-      
+               (cadr ast)))
       ((ADD)
        (cont env
              output
              (+ (strip->number (exec-expr env output (cadr ast) cont))
-                (strip->number (exec-expr env output (caddr ast) cont)))
-       )
-      )
-
+                (strip->number (exec-expr env output (caddr ast) cont)))))
       ((SUB)
        (cont env
              output
              (- (strip->number (exec-expr env output (cadr ast) cont))
-                (strip->number (exec-expr env output (caddr ast) cont)))
-       )
-      )
-
+                (strip->number (exec-expr env output (caddr ast) cont)))))
       ((MUL)
        (cont env
              output
              (* (strip->number (exec-expr env output (cadr ast) cont))
-                (strip->number (exec-expr env output (caddr ast) cont)))
-       )
-      )
-
+                (strip->number (exec-expr env output (caddr ast) cont)))))
       ((DIV)
        (cont env
              output
              (if (equal? 0 (strip->number (exec-expr env output (caddr ast) cont)))
                 (arithmetic-err "division by zero.")
                 (quotient (strip->number (exec-expr env output (cadr ast) cont))
-                          (strip->number (exec-expr env output (caddr ast) cont)))
-             )
-       )
-      )
-
+                          (strip->number (exec-expr env output (caddr ast) cont))))))
       ((MOD)
        (cont env
              output
              (remainder (strip->number (exec-expr env output (cadr ast) cont))
-                        (strip->number (exec-expr env output (caddr ast) cont)))
-       )
-      )
-
+                        (strip->number (exec-expr env output (caddr ast) cont)))))
       ((LT)
        (cont env
              output
              (< (strip->number (exec-expr env output (cadr ast) cont))
-             (strip->number (exec-expr env output (caddr ast) cont)))
-       )
-      )
-
+             (strip->number (exec-expr env output (caddr ast) cont)))))
       ((GT)
        (cont env
              output
              (> (strip->number (exec-expr env output (cadr ast) cont))
-             (strip->number (exec-expr env output (caddr ast) cont)))
-       )
-      )
-
+             (strip->number (exec-expr env output (caddr ast) cont)))))
       ((LE)
        (cont env
              output
              (<= (strip->number (exec-expr env output (cadr ast) cont))
-             (strip->number (exec-expr env output (caddr ast) cont)))
-       )
-      )
-
+             (strip->number (exec-expr env output (caddr ast) cont)))))
       ((GE)
        (cont env
              output
              (>= (strip->number (exec-expr env output (cadr ast) cont))
-             (strip->number (exec-expr env output (caddr ast) cont)))
-       )
-      )
-
+             (strip->number (exec-expr env output (caddr ast) cont)))))
       ((EQ)
        (cont env
              output
              (equal? (strip->number (exec-expr env output (cadr ast) cont))
-             (strip->number (exec-expr env output (caddr ast) cont)))
-       )
-      )
-
+             (strip->number (exec-expr env output (caddr ast) cont)))))
       ((NE)
        (cont env
              output
              (not (equal? (strip->number (exec-expr env output (cadr ast) cont))
-             (strip->number (exec-expr env output (caddr ast) cont))))
-       )
-      )
-
+             (strip->number (exec-expr env output (caddr ast) cont))))))
       (else
        "internal error (unknown expression AST)\n"))))
 
