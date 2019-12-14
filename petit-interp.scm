@@ -197,7 +197,7 @@
                    (cont inp 'IF-SYM))
                 ((string=? id "while")
                    (cont inp 'WHILE-SYM))
-                ((string=? id "do")
+                ((string=? id "do")“Continuation
                    (cont inp 'DO-SYM))
                 ((string=? id "else")
                    (cont inp 'ELSE-SYM))
@@ -272,7 +272,7 @@
                     (<while_stat> inp2 (continue-stat cont))
                   )
                   ((IF-SYM)
-                    (<if_stat> inp2 cont)
+                    (<if_stat> inp2 (continue-stat cont))
                   )
                   (else
                    (<expr_stat> inp (continue-stat cont))))))))
@@ -345,8 +345,6 @@
                                                       expr))))
                                 (<test> inp cont))))))))
 
-
-;; (ADD (INT 1) (INT 2)) ==> (cont inp (list 'ADD nb1 nb2)
 
 
 (define <test>
@@ -505,10 +503,22 @@
                     (cadr ast)
                     cont
          )
-         (exec-stat env
-                    output
+         (exec-stat env    ;; donner l'env d'output du premier au deuxième
+                    output ;; concat les sorties
                     (caddr ast)
                     cont
+         )
+      )
+      
+      ((IF)
+         (exec-expr env
+                    output 
+                    (cadr ast)
+                    (lambda (env output val)
+                      (pp val)
+                      (if (not (boolean? val)) (number->string val) val)
+                      
+                    )
          )
       )
 
@@ -539,10 +549,10 @@
       )
 
       ((INT)
-       (cont env
-             output
-             (cadr ast))) ;; retourner la valeur de la constante
-
+         (cont env ;; retourner la valeur de la constante
+               output
+               (cadr ast)))                       
+      
       ((ADD)
        (cont env
              output
@@ -632,19 +642,7 @@
              (not (equal? (strip->number (exec-expr env output (cadr ast) cont))
              (strip->number (exec-expr env output (caddr ast) cont))))
        )
-      ((IF)
-       (let ((ans (exec-expr env
-                             output
-                             (cadr ast)
-                             (lambda (env output val) output))))
-            (if ans
-               cont 
-               cont
-            )
-       )
       )
-      )
-
 
       (else
        "internal error (unknown expression AST)\n"))))
