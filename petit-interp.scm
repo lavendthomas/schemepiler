@@ -31,6 +31,13 @@
   (lambda (inp)
     (parse inp execute)))
 
+
+;; This function parses the input and then print the S-expression that
+;; was generated
+(define parse-and-print
+  (lambda (inp)
+    (parse inp pp)))
+
 ;; La fonction next-sym recoit deux parametres, une liste de
 ;; caracteres et une continuation.  La liste de caracteres sera
 ;; analysee pour en extraire le prochain symbole.  La continuation
@@ -435,11 +442,13 @@
          (exec-stat env
                     output
                     (cadr ast)
-                    cont)
-         (exec-stat env    ;; donner l'env d'output du premier au deuxième
-                    output ;; concat les sorties
-                    (caddr ast)
-                    cont))
+                    (lambda (env2 output2) ;; env and output are updated with their value after execution
+                      (exec-stat env2         ;; donner l'env d'output du premier au deuxième
+                                 output2      ;; concat les sorties
+                                 (caddr ast)
+                                 (lambda (env3 output3)
+                                   (cont env3 output3))))))
+
 
       ((IF)
          (exec-expr env
@@ -451,6 +460,7 @@
       (else
        "internal error (unknown statement AST)\n"))))
 
+                      
 ;; La fonction exec-expr fait l'interpretation d'une expression du
 ;; programme.  Elle prend quatre parametres : une liste d'association
 ;; qui contient la valeur de chaque variable du programme, une chaine
@@ -536,11 +546,6 @@
       (else
        "internal error (unknown expression AST)\n"))))
 
-;; Il faut enlever la trace avant la remise...
-
-(trace main parse-and-execute execute <program> <expr> <while_stat> <if_stat>)
-
-(trace <sum> <mult> <term> next-sym exec-stat exec-expr <stat>)
 
 
 ;;;----------------------------------------------------------------------------
