@@ -1,2 +1,2 @@
 # schemepiler
-Compiler for a C-like language in Scheme
+Interpreter for a C-like language in Scheme.
