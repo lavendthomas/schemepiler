@@ -62,6 +62,8 @@
                    ((char=? c #\() (cont ($ inp) 'LPAR))
                    ((char=? c #\)) (cont ($ inp) 'RPAR))
                    ((char=? c #\;) (cont ($ inp) 'SEMI))
+                   ((char=? c #\{) (cont ($ inp) 'LBRA))
+                   ((char=? c #\}) (cont ($ inp) 'RBRA))
                    ((char=? c #\+) (cont ($ inp) 'PLUS))
                    ((char=? c #\-) (cont ($ inp) 'MINS))
                    ((char=? c #\*) (cont ($ inp) 'TIME))
@@ -246,7 +248,7 @@
    (lambda (cont)
       (lambda (inp3 cont3)
          (next-sym inp3 (lambda (inp4 sym4)
-                           (if (equal? sym4 'EOI)
+                           (if (or (equal? sym4 'EOI) (equal? sym4 'RBRA)) ;; statements can be followed by enf of file or }
                               (cont inp3 cont3)
                               (<stat> inp3 (lambda (inp4 expr)
                                                 (cont inp4 (list 'SEQ cont3 expr))))))))))
@@ -277,9 +279,10 @@
   (lambda (inp cont)
       (<paren_expr> inp
           (lambda (inp2 expr_par)
-              (<stat> inp2
+              (<bracket_stat> inp2
                   (lambda (inp3 expr_stat)
                       (cont inp3 (list 'IF expr_par expr_stat))))))))
+              
 
 (define <print_stat>
   (lambda (inp cont)
@@ -303,6 +306,18 @@
                                 (lambda (inp)
                                   (cont inp
                                         expr)))))))))
+                                        
+(define <bracket_stat>
+  (lambda (inp cont)
+    (expect 'LBRA ;; must start with "{"
+            inp
+            (lambda (inp)
+                    (<stat> inp
+                            (lambda (inp expr)
+                                    (expect 'RBRA ;; must end with "}"
+                                            inp
+                                            (lambda (inp)
+                                                    (cont inp expr)))))))))
 
 (define <expr_stat>
   (lambda (inp cont)
@@ -557,3 +572,8 @@
     (print (parse-and-execute (read-all (current-input-port) read-char)))))
 
 ;;;----------------------------------------------------------------------------
+
+
+;;(trace main parse-and-execute execute <program> <expr> <while_stat> <if_stat> <bracket_stat>)
+
+;;(trace <sum> <mult> <term> next-sym exec-stat exec-expr <stat>) 
