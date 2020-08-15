@@ -143,8 +143,11 @@
 
 (define strip->number
   (lambda (str)
-      (let ((stripped (substring str 0 (- (string-length str) 1))))
-        (string->number stripped))))
+      (if (number? str)
+          str
+          (let ((stripped (substring str 0 (- (string-length str) 1))))
+            (string->number stripped)))))
+      
 
 ;; La fonction symbol-int recoit deux parametres, une liste de
 ;; caracteres qui debute par un chiffre et une continuation.  La liste
@@ -428,6 +431,7 @@
 ;; l'enonce et une chaine de caracteres qui contient la sortie
 ;; accumulee apres l'interpretation de l'enonce.
 
+
 (define exec-stat
   (lambda (env output ast cont)
     (case (car ast)
@@ -466,12 +470,17 @@
 
 
       ((IF)
-         (exec-expr env
+         (exec-expr env ;; execute the condition of the if
                     output
                     (cadr ast)
                     (lambda (env output val)
-                      (pp val)
-                      (if (not (boolean? val)) (number->string val) val))))
+                            (if val
+                                (exec-stat env  ;; execute the body of the if
+                                           output
+                                           (caddr ast)
+                                           (lambda (env output)
+                                                   (cont env output)))
+                                (cont env output)))))   ;; skip the body of the if
       (else
        "internal error (unknown statement AST)\n"))))
 
@@ -486,14 +495,15 @@
 ;; l'expression et une chaine de caracteres qui contient la sortie
 ;; accumulee apres l'interpretation de l'expression.
 
+(define value3 (lambda (x y val) val))
+
 (define exec-expr
   (lambda (env output ast cont)
     (case (car ast)
 
       ((ASSIGN)
        (cont (cons (cons (cadr ast)
-                         (exec-expr env output (caddr ast)
-                             (lambda (x y val) val)))
+                         (exec-expr env output (caddr ast) value3))
                     env) ;; environement où on a ajouté la variable
              output
              '())) ;; pas de sous-arbre où continuer le travail
@@ -504,60 +514,60 @@
       ((ADD)
        (cont env
              output
-             (+ (strip->number (exec-expr env output (cadr ast) cont))
-                (strip->number (exec-expr env output (caddr ast) cont)))))
+             (+ (strip->number (exec-expr env output (cadr ast) value3))
+                (strip->number (exec-expr env output (caddr ast) value3)))))
       ((SUB)
        (cont env
              output
-             (- (strip->number (exec-expr env output (cadr ast) cont))
-                (strip->number (exec-expr env output (caddr ast) cont)))))
+             (- (strip->number (exec-expr env output (cadr ast) value3))
+                (strip->number (exec-expr env output (caddr ast) value3)))))
       ((MUL)
        (cont env
              output
-             (* (strip->number (exec-expr env output (cadr ast) cont))
-                (strip->number (exec-expr env output (caddr ast) cont)))))
+             (* (strip->number (exec-expr env output (cadr ast) value3))
+                (strip->number (exec-expr env output (caddr ast) value3)))))
       ((DIV)
        (cont env
              output
-             (if (equal? 0 (strip->number (exec-expr env output (caddr ast) cont)))
+             (if (equal? 0 (strip->number (exec-expr env output (caddr ast) value3)))
                 (arithmetic-err "division by zero.")
-                (quotient (strip->number (exec-expr env output (cadr ast) cont))
-                          (strip->number (exec-expr env output (caddr ast) cont))))))
+                (quotient (strip->number (exec-expr env output (cadr ast) value3))
+                          (strip->number (exec-expr env output (caddr ast) value3))))))
       ((MOD)
        (cont env
              output
-             (remainder (strip->number (exec-expr env output (cadr ast) cont))
-                        (strip->number (exec-expr env output (caddr ast) cont)))))
+             (remainder (strip->number (exec-expr env output (cadr ast) value3))
+                        (strip->number (exec-expr env output (caddr ast) value3)))))
       ((LT)
        (cont env
              output
-             (< (strip->number (exec-expr env output (cadr ast) cont))
-             (strip->number (exec-expr env output (caddr ast) cont)))))
+             (< (strip->number (exec-expr env output (cadr ast) value3))
+                (strip->number (exec-expr env output (caddr ast) value3)))))
       ((GT)
        (cont env
              output
-             (> (strip->number (exec-expr env output (cadr ast) cont))
-             (strip->number (exec-expr env output (caddr ast) cont)))))
+             (> (strip->number (exec-expr env output (cadr ast) value3))
+                (strip->number (exec-expr env output (caddr ast) value3)))))
       ((LE)
        (cont env
              output
-             (<= (strip->number (exec-expr env output (cadr ast) cont))
-             (strip->number (exec-expr env output (caddr ast) cont)))))
+             (<= (strip->number (exec-expr env output (cadr ast) value3))
+                (strip->number (exec-expr env output (caddr ast) value3)))))
       ((GE)
        (cont env
              output
-             (>= (strip->number (exec-expr env output (cadr ast) cont))
-             (strip->number (exec-expr env output (caddr ast) cont)))))
+             (>= (strip->number (exec-expr env output (cadr ast) value3))
+                (strip->number (exec-expr env output (caddr ast) value3)))))
       ((EQ)
        (cont env
              output
-             (equal? (strip->number (exec-expr env output (cadr ast) cont))
-             (strip->number (exec-expr env output (caddr ast) cont)))))
+             (equal? (strip->number (exec-expr env output (cadr ast) value3))
+                     (strip->number (exec-expr env output (caddr ast) value3)))))
       ((NE)
        (cont env
              output
-             (not (equal? (strip->number (exec-expr env output (cadr ast) cont))
-             (strip->number (exec-expr env output (caddr ast) cont))))))
+             (not (equal? (strip->number (exec-expr env output (cadr ast) value3))
+                  (strip->number (exec-expr env output (caddr ast) value3))))))
       (else
        "internal error (unknown expression AST)\n"))))
 
@@ -576,4 +586,4 @@
 
 ;;(trace main parse-and-execute execute <program> <expr> <while_stat> <if_stat> <bracket_stat>)
 
-;;(trace <sum> <mult> <term> next-sym exec-stat exec-expr <stat>) 
+;;(trace <sum> <mult> <term>  exec-stat exec-expr <stat> pp) 
