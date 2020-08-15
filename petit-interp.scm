@@ -284,7 +284,7 @@
    (lambda (inp cont)
        (<paren_expr> inp
            (lambda (inp2 expr_par)
-               (<stat> inp2
+               (<bracket_stat> inp2
                    (lambda (inp3 expr_stat)
                        (cont inp3 (list 'WHILE expr_par expr_stat))))))))
 
@@ -593,11 +593,7 @@
         (runtime-err (string-append "Variable \"" val "\" not instantiated")) ;; variable not found
         (if (equal? val (caar env))
             (cdar env) ;; varible found on the head of the list
-            (get-from-environment (cdr env) val) ;; continue looking in the association list
-        )    
-    )
-  )
-)
+            (get-from-environment (cdr env) val))))) ;; continue looking in the association list
 
 ;;;----------------------------------------------------------------------------
 
@@ -612,4 +608,4 @@
 
 ;; (trace main parse-and-execute execute <program> <expr> <while_stat> <if_stat> <bracket_stat>)
 
-;; (trace <sum> <mult> <term>  exec-stat exec-expr <stat>) 
+;; (trace <sum> <mult> <term> next-sym exec-stat exec-expr <stat>) 
