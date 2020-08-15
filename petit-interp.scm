@@ -491,8 +491,27 @@
                                            (lambda (env output)
                                                    (cont env output)))
                                 (cont env output)))))   ;; skip the body of the if
+      
+      ((WHILE)
+         (exec-while env output ast cont))
+                               
       (else
        "internal error (unknown statement AST)\n"))))
+
+
+(define exec-while
+  (lambda (env output ast cont)
+     (exec-expr env ;; execute the condition of the while
+          output
+          (cadr ast)
+          (lambda (env output val)
+                  (if val
+                      (exec-stat env  ;; execute the body of the while
+                                 output
+                                 (caddr ast)
+                                 (lambda (env output)
+                                         (exec-while env output ast cont))) ;; loop again
+                      (cont env output))))))   ;; skip the body of the while and end the while loop
 
                       
 ;; La fonction exec-expr fait l'interpretation d'une expression du
