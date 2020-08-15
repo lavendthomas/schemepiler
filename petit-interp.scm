@@ -111,7 +111,7 @@
   (lambda ()
     "syntax error\n"))
 
-;; La fonction syntax-err retourne le message d'erreur indiquant une
+;; La fonction arithmetic-err retourne le message d'erreur indiquant une
 ;; erreur arithmetique.
 
 (define arithmetic-err
@@ -119,6 +119,16 @@
       (begin
          (print (string-append "Arithmetic error: " reason "\n")))
          (exit)))
+
+;; La fonction runtime-err retourne le message d'erreur indiquant une
+;; erreur arithmetique.
+
+(define runtime-err
+   (lambda (reason)
+      (begin
+         (print (string-append "Runetime error: " reason "\n")))
+         (exit)))
+
 
 ;; La fonction blanc? teste si son unique parametre est un caractere
 ;; blanc.
@@ -500,13 +510,18 @@
 (define exec-expr
   (lambda (env output ast cont)
     (case (car ast)
-
       ((ASSIGN)
        (cont (cons (cons (cadr ast)
                          (exec-expr env output (caddr ast) value3))
                     env) ;; environement où on a ajouté la variable
              output
              '())) ;; pas de sous-arbre où continuer le travail
+      ((VAR)
+         (cont env
+               output
+               (get-from-environment env (cadr ast)) ;; (cadr ast) if the name of the variable
+         )
+      )
       ((INT)
          (cont env ;; retourner la valeur de la constante
                output
@@ -571,7 +586,18 @@
       (else
        "internal error (unknown expression AST)\n"))))
 
-
+;; Retrives the value val from the environment env, which is a self-made association list
+(define get-from-environment
+  (lambda (env val)
+    (if (= 0 (length env))
+        (runtime-err (string-append "Variable \"" val "\" not instantiated")) ;; variable not found
+        (if (equal? val (caar env))
+            (cdar env) ;; varible found on the head of the list
+            (get-from-environment (cdr env) val) ;; continue looking in the association list
+        )    
+    )
+  )
+)
 
 ;;;----------------------------------------------------------------------------
 
@@ -584,6 +610,6 @@
 ;;;----------------------------------------------------------------------------
 
 
-;;(trace main parse-and-execute execute <program> <expr> <while_stat> <if_stat> <bracket_stat>)
+;; (trace main parse-and-execute execute <program> <expr> <while_stat> <if_stat> <bracket_stat>)
 
-;;(trace <sum> <mult> <term>  exec-stat exec-expr <stat> pp) 
+;; (trace <sum> <mult> <term>  exec-stat exec-expr <stat>) 
